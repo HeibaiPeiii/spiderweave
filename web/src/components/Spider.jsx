@@ -86,29 +86,28 @@ export default function Spider() {
         >
           {/* 8 条腿 — 两边各4条，带膝关节弯曲 */}
           {(() => {
-            // 左侧 4 条 + 右侧 4 条，每条腿：身体 → 膝关节 → 足
-            const leftAngles = [-70, -32, 15, 55]   // 前→后
-            const rightAngles = [-110, -148, 165, 125] // 前→后（镜像）
+            // 左侧 4 条 + 右侧 4 条
+            const leftAngles = [-80, -35, 20, 65]
+            const rightAngles = [-100, -145, 160, 115]
             const allAngles = [...leftAngles, ...rightAngles]
 
             return allAngles.map((deg, i) => {
               const side = i < 4 ? 'left' : 'right'
               const rad1 = (deg * Math.PI) / 180
-              // 身体连接点
-              const bx = half + Math.cos(rad1) * 19
-              const by = half + Math.sin(rad1) * 19
-              // 膝关节：继续向外但微微上提
-              const kneeDist = 24 * style.legSpread
-              const kneeAngle = deg + (side === 'left' ? -8 : 8)
+              const bx = half + Math.cos(rad1) * 16
+              const by = half + Math.sin(rad1) * 16
+              // 膝关节
+              const kneeDist = 16 * style.legSpread
+              const kneeAngle = deg + (side === 'left' ? -12 : 12)
               const radK = (kneeAngle * Math.PI) / 180
               const kx = bx + Math.cos(radK) * kneeDist
-              const ky = by + Math.sin(radK) * kneeDist - 4
-              // 足：从膝盖向下向外
-              const footDist = 22 * style.legSpread
-              const footAngle = deg + (side === 'left' ? 15 : -15)
+              const ky = by + Math.sin(radK) * kneeDist - 3
+              // 足
+              const footDist = 14 * style.legSpread
+              const footAngle = deg + (side === 'left' ? 20 : -20)
               const radF = (footAngle * Math.PI) / 180
               const fx = kx + Math.cos(radF) * footDist
-              const fy = ky + Math.sin(radF) * footDist + 6
+              const fy = ky + Math.sin(radF) * footDist + 4
 
               return (
                 <g key={i}>
@@ -116,7 +115,7 @@ export default function Spider() {
                   <line
                     x1={bx} y1={by} x2={kx} y2={ky}
                     stroke={style.bodyFill}
-                    strokeWidth={lerp(2, 3, style.legSpread)}
+                    strokeWidth={lerp(1.6, 2.4, style.legSpread)}
                     strokeLinecap="round"
                     opacity={lerp(0.35, 0.7, style.legSpread)}
                     style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
@@ -125,14 +124,14 @@ export default function Spider() {
                   <line
                     x1={kx} y1={ky} x2={fx} y2={fy}
                     stroke={style.bodyFill}
-                    strokeWidth={lerp(1.5, 2.5, style.legSpread)}
+                    strokeWidth={lerp(1.2, 2, style.legSpread)}
                     strokeLinecap="round"
                     opacity={lerp(0.3, 0.6, style.legSpread)}
                     style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
                   />
                   {/* 小脚 */}
                   <circle
-                    cx={fx} cy={fy} r={2.2}
+                    cx={fx} cy={fy} r={1.8}
                     fill={style.bodyFill}
                     opacity={lerp(0.3, 0.5, style.legSpread)}
                   />
