@@ -167,6 +167,14 @@ export function SpiderProvider({ children }) {
     })
   }, [updateData])
 
+  /** 删除网 */
+  const deleteWeb = useCallback((webId) => {
+    updateData((prev) => ({
+      ...prev,
+      webs: prev.webs.filter((w) => w.id !== webId),
+    }))
+  }, [updateData])
+
   const value = useMemo(() => ({
     // 原始数据
     spider: data.spider,
@@ -180,7 +188,8 @@ export function SpiderProvider({ children }) {
     createWeb,
     completeStep,
     addStep,
-  }), [data, derived, feedSpider, createWeb, completeStep, addStep])
+    deleteWeb,
+  }), [data, derived, feedSpider, createWeb, completeStep, addStep, deleteWeb])
 
   return (
     <SpiderContext.Provider value={value}>

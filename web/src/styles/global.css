@@ -14,6 +14,7 @@
 
 html, body, #root {
   height: 100%;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
 }
@@ -139,4 +140,41 @@ p, span, div {
   0%, 100% { transform: translateX(0); }
   10%, 50%, 90% { transform: translateX(-2px); }
   30%, 70% { transform: translateX(2px); }
+}
+
+/* --- 织丝动画 --- */
+@keyframes drawThread {
+  from { stroke-dashoffset: var(--thread-len); }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes pulseNode {
+  0%   { r: 2; opacity: 0.3; }
+  50%  { r: 7; opacity: 1; }
+  100% { r: 5; opacity: 0.9; }
+}
+
+/* --- 移动端适配 --- */
+@media (max-width: 480px) {
+  body {
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 13px 0;
+    font-size: 15px;
+  }
+
+  .page {
+    padding: 0 12px;
+  }
+
+  .page-header {
+    padding: 12px 16px;
+  }
+}
+
+/* --- 安全区域（刘海屏） --- */
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
