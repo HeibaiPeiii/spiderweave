@@ -94,18 +94,14 @@ export default function Spider() {
             const y1 = half + Math.sin(rad) * 20
             const x2 = half + Math.cos(rad) * (20 + legLen)
             const y2 = half + Math.sin(rad) * (20 + legLen)
-            const droop = (1 - style.legSpread) * 12
-            const mx = half + Math.cos(rad) * (20 + legLen * 0.5) + (i % 2 === 0 ? 5 : -5)
-            const my = half + Math.sin(rad) * (20 + legLen * 0.5) + droop
 
-            // 腿末端小圆点（小脚）
             return (
               <g key={i}>
-                <path
-                  d={`M${x1},${y1} Q${mx},${my} ${x2},${y2}`}
+                <line
+                  x1={x1} y1={y1}
+                  x2={x2} y2={y2}
                   stroke={style.bodyFill}
                   strokeWidth={lerp(2.2, 3.2, style.legSpread)}
-                  fill="none"
                   strokeLinecap="round"
                   opacity={lerp(0.35, 0.7, style.legSpread)}
                   style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
