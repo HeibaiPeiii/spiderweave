@@ -86,52 +86,58 @@ export default function Spider() {
         >
           {/* 8 条腿 — 两边各4条，带膝关节弯曲 */}
           {(() => {
-            // 左侧 4 条 + 右侧 4 条
-            const leftAngles = [-80, -35, 20, 65]
-            const rightAngles = [-100, -145, 160, 115]
-            const allAngles = [...leftAngles, ...rightAngles]
+            // 左侧 4 条腿从身体左侧向外展开
+            // 右侧 4 条镜像
+            const legs = [
+              { side: 'left',  attachDeg: -50, kneeOut: -15, footDown: 10 },
+              { side: 'left',  attachDeg: -20, kneeOut: -10, footDown: 18 },
+              { side: 'left',  attachDeg:  15, kneeOut:   5, footDown: 22 },
+              { side: 'left',  attachDeg:  50, kneeOut:  15, footDown: 15 },
+              { side: 'right', attachDeg:-130, kneeOut:  15, footDown: 10 },
+              { side: 'right', attachDeg:-160, kneeOut:  10, footDown: 18 },
+              { side: 'right', attachDeg: 165, kneeOut:  -5, footDown: 22 },
+              { side: 'right', attachDeg: 130, kneeOut: -15, footDown: 15 },
+            ]
 
-            return allAngles.map((deg, i) => {
-              const side = i < 4 ? 'left' : 'right'
-              const rad1 = (deg * Math.PI) / 180
-              const bx = half + Math.cos(rad1) * 16
-              const by = half + Math.sin(rad1) * 16
-              // 膝关节
-              const kneeDist = 16 * style.legSpread
-              const kneeAngle = deg + (side === 'left' ? -12 : 12)
-              const radK = (kneeAngle * Math.PI) / 180
+            return legs.map((leg, i) => {
+              const { side, attachDeg, kneeOut, footDown } = leg
+              const radA = (attachDeg * Math.PI) / 180
+              // 身体连接点 — 在身体侧面
+              const bx = half + Math.cos(radA) * 18
+              const by = half + Math.sin(radA) * 18 + 8
+              // 膝关节 — 向外展开
+              const kneeDist = 14 * style.legSpread
+              const kneeDeg = attachDeg + (side === 'left' ? kneeOut : -kneeOut)
+              const radK = (kneeDeg * Math.PI) / 180
               const kx = bx + Math.cos(radK) * kneeDist
-              const ky = by + Math.sin(radK) * kneeDist - 3
-              // 足
-              const footDist = 14 * style.legSpread
-              const footAngle = deg + (side === 'left' ? 20 : -20)
-              const radF = (footAngle * Math.PI) / 180
+              const ky = by + Math.sin(radK) * kneeDist
+              // 足 — 向下落地
+              const footDist = 12 * style.legSpread
+              const footDeg = attachDeg + (side === 'left' ? footDown : -footDown)
+              const radF = (footDeg * Math.PI) / 180
               const fx = kx + Math.cos(radF) * footDist
-              const fy = ky + Math.sin(radF) * footDist + 4
+              const fy = ky + Math.sin(radF) * footDist + 6
 
               return (
                 <g key={i}>
-                  {/* 身体→膝盖 */}
                   <line
                     x1={bx} y1={by} x2={kx} y2={ky}
                     stroke={style.bodyFill}
-                    strokeWidth={lerp(1.6, 2.4, style.legSpread)}
+                    strokeWidth={lerp(1.5, 2.2, style.legSpread)}
                     strokeLinecap="round"
                     opacity={lerp(0.35, 0.7, style.legSpread)}
                     style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
                   />
-                  {/* 膝盖→足 */}
                   <line
                     x1={kx} y1={ky} x2={fx} y2={fy}
                     stroke={style.bodyFill}
-                    strokeWidth={lerp(1.2, 2, style.legSpread)}
+                    strokeWidth={lerp(1.1, 1.8, style.legSpread)}
                     strokeLinecap="round"
                     opacity={lerp(0.3, 0.6, style.legSpread)}
                     style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
                   />
-                  {/* 小脚 */}
                   <circle
-                    cx={fx} cy={fy} r={1.8}
+                    cx={fx} cy={fy} r={1.6}
                     fill={style.bodyFill}
                     opacity={lerp(0.3, 0.5, style.legSpread)}
                   />
