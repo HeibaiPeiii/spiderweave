@@ -103,8 +103,8 @@ export default function Spider() {
               const { side, attachDeg, kneeOut, footDown } = leg
               const radA = (attachDeg * Math.PI) / 180
               // 身体连接点 — 在身体侧面
-              const bx = half + Math.cos(radA) * 18
-              const by = half + Math.sin(radA) * 18 + 8
+              const bx = half + Math.cos(radA) * 13
+              const by = half + Math.sin(radA) * 13 + 5
               // 膝关节 — 向外展开
               const kneeDist = 14 * style.legSpread
               const kneeDeg = attachDeg + (side === 'left' ? kneeOut : -kneeOut)
@@ -146,87 +146,87 @@ export default function Spider() {
             })
           })()}
 
-          {/* 身体 — 圆胖 */}
+          {/* 身体 */}
           <ellipse
             cx={half}
-            cy={half + 8}
-            rx={20}
-            ry={style.bodyRy}
+            cy={half + 5}
+            rx={14}
+            ry={style.bodyRy * 0.7}
             fill={style.bodyFill}
             style={{ transition: 'fill 0.8s ease' }}
           />
 
-          {/* 身体高光 — 增加立体感 */}
+          {/* 身体高光 */}
           <ellipse
-            cx={half - 5}
-            cy={half + 1}
-            rx={7}
-            ry={style.bodyRy * 0.35}
+            cx={half - 3}
+            cy={half}
+            rx={5}
+            ry={style.bodyRy * 0.25}
             fill="rgba(255,255,255,0.12)"
             style={{ transition: 'fill 0.8s ease' }}
           />
 
-          {/* 头部 — 大圆头（可爱比例） */}
+          {/* 头部 */}
           <circle
             cx={half}
-            cy={half - 22}
-            r={15}
+            cy={half - 16}
+            r={11}
             fill={style.bodyFill}
             style={{ transition: 'fill 0.8s ease' }}
           />
 
           {/* 头部高光 */}
           <circle
-            cx={half - 4}
-            cy={half - 27}
-            r={5}
+            cx={half - 3}
+            cy={half - 20}
+            r={4}
             fill="rgba(255,255,255,0.1)"
           />
 
           {/* 大眼睛 + 白色高光 */}
           <ellipse
-            cx={half - 6}
-            cy={half - 25}
-            rx={lerp(2.5, 5, style.eyeOpen)}
-            ry={lerp(2, 5.5, style.eyeOpen)}
+            cx={half - 5}
+            cy={half - 19}
+            rx={lerp(2, 4, style.eyeOpen)}
+            ry={lerp(1.5, 4.5, style.eyeOpen)}
             fill="#1a1a2e"
             style={{ transition: 'rx 0.8s ease, ry 0.8s ease' }}
           />
           <ellipse
-            cx={half + 6}
-            cy={half - 25}
-            rx={lerp(2.5, 5, style.eyeOpen)}
-            ry={lerp(2, 5.5, style.eyeOpen)}
+            cx={half + 5}
+            cy={half - 19}
+            rx={lerp(2, 4, style.eyeOpen)}
+            ry={lerp(1.5, 4.5, style.eyeOpen)}
             fill="#1a1a2e"
             style={{ transition: 'rx 0.8s ease, ry 0.8s ease' }}
           />
           {/* 眼神光 */}
-          <circle cx={half - 7.5} cy={half - 27} r={1.8} fill="rgba(255,255,255,0.85)" />
-          <circle cx={half + 4.5} cy={half - 27} r={1.8} fill="rgba(255,255,255,0.85)" />
+          <circle cx={half - 6} cy={half - 21} r={1.4} fill="rgba(255,255,255,0.85)" />
+          <circle cx={half + 4} cy={half - 21} r={1.4} fill="rgba(255,255,255,0.85)" />
 
-          {/* 微笑弧线 */}
+          {/* 微笑 */}
           <path
-            d={`M${half - 4},${half - 16} Q${half},${half - 11} ${half + 4},${half - 16}`}
+            d={`M${half - 3},${half - 12} Q${half},${half - 8} ${half + 3},${half - 12}`}
             stroke="#1a1a2e"
-            strokeWidth={1}
+            strokeWidth={0.8}
             fill="none"
             strokeLinecap="round"
             opacity={lerp(0.3, 0.7, style.eyeOpen)}
             style={{ transition: 'opacity 0.8s ease' }}
           />
 
-          {/* 螯肢 — 小短可爱 */}
+          {/* 螯肢 */}
           <path
-            d={`M${half - 4},${half - 35} L${half - 5},${half - 40}`}
+            d={`M${half - 3},${half - 26} L${half - 4},${half - 30}`}
             stroke={style.bodyFill}
-            strokeWidth={2.5}
+            strokeWidth={2}
             strokeLinecap="round"
             opacity={0.65}
           />
           <path
-            d={`M${half + 4},${half - 35} L${half + 5},${half - 40}`}
+            d={`M${half + 3},${half - 26} L${half + 4},${half - 30}`}
             stroke={style.bodyFill}
-            strokeWidth={2.5}
+            strokeWidth={2}
             strokeLinecap="round"
             opacity={0.65}
           />
