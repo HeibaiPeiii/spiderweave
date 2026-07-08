@@ -84,36 +84,62 @@ export default function Spider() {
           transform={`scale(${style.scale})`}
           style={{ transformOrigin: 'center', transition: 'transform 0.8s ease' }}
         >
-          {/* 8 条短粗腿 — 可爱比例 */}
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((baseAngle, i) => {
-            const spread = (i % 2 === 0 ? 1 : -1) * (1 - style.legSpread) * 12
-            const angle = baseAngle + spread
-            const rad = (angle * Math.PI) / 180
-            const legLen = 32 * style.legSpread
-            const x1 = half + Math.cos(rad) * 20
-            const y1 = half + Math.sin(rad) * 20
-            const x2 = half + Math.cos(rad) * (20 + legLen)
-            const y2 = half + Math.sin(rad) * (20 + legLen)
+          {/* 8 条腿 — 两边各4条，带膝关节弯曲 */}
+          {(() => {
+            // 左侧 4 条 + 右侧 4 条，每条腿：身体 → 膝关节 → 足
+            const leftAngles = [-70, -32, 15, 55]   // 前→后
+            const rightAngles = [-110, -148, 165, 125] // 前→后（镜像）
+            const allAngles = [...leftAngles, ...rightAngles]
 
-            return (
-              <g key={i}>
-                <line
-                  x1={x1} y1={y1}
-                  x2={x2} y2={y2}
-                  stroke={style.bodyFill}
-                  strokeWidth={lerp(2.2, 3.2, style.legSpread)}
-                  strokeLinecap="round"
-                  opacity={lerp(0.35, 0.7, style.legSpread)}
-                  style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
-                />
-                <circle
-                  cx={x2} cy={y2} r={2.5}
-                  fill={style.bodyFill}
-                  opacity={lerp(0.3, 0.55, style.legSpread)}
-                />
-              </g>
-            )
-          })}
+            return allAngles.map((deg, i) => {
+              const side = i < 4 ? 'left' : 'right'
+              const rad1 = (deg * Math.PI) / 180
+              // 身体连接点
+              const bx = half + Math.cos(rad1) * 19
+              const by = half + Math.sin(rad1) * 19
+              // 膝关节：继续向外但微微上提
+              const kneeDist = 24 * style.legSpread
+              const kneeAngle = deg + (side === 'left' ? -8 : 8)
+              const radK = (kneeAngle * Math.PI) / 180
+              const kx = bx + Math.cos(radK) * kneeDist
+              const ky = by + Math.sin(radK) * kneeDist - 4
+              // 足：从膝盖向下向外
+              const footDist = 22 * style.legSpread
+              const footAngle = deg + (side === 'left' ? 15 : -15)
+              const radF = (footAngle * Math.PI) / 180
+              const fx = kx + Math.cos(radF) * footDist
+              const fy = ky + Math.sin(radF) * footDist + 6
+
+              return (
+                <g key={i}>
+                  {/* 身体→膝盖 */}
+                  <line
+                    x1={bx} y1={by} x2={kx} y2={ky}
+                    stroke={style.bodyFill}
+                    strokeWidth={lerp(2, 3, style.legSpread)}
+                    strokeLinecap="round"
+                    opacity={lerp(0.35, 0.7, style.legSpread)}
+                    style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
+                  />
+                  {/* 膝盖→足 */}
+                  <line
+                    x1={kx} y1={ky} x2={fx} y2={fy}
+                    stroke={style.bodyFill}
+                    strokeWidth={lerp(1.5, 2.5, style.legSpread)}
+                    strokeLinecap="round"
+                    opacity={lerp(0.3, 0.6, style.legSpread)}
+                    style={{ transition: 'stroke 0.8s ease, opacity 0.8s ease' }}
+                  />
+                  {/* 小脚 */}
+                  <circle
+                    cx={fx} cy={fy} r={2.2}
+                    fill={style.bodyFill}
+                    opacity={lerp(0.3, 0.5, style.legSpread)}
+                  />
+                </g>
+              )
+            })
+          })()}
 
           {/* 身体 — 圆胖 */}
           <ellipse
