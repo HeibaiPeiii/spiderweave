@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const SYSTEM_PROMPT = `你是小蛛，一只住在用户目标网上的可爱小蜘蛛。你帮用户把模糊的目标拆成具体步骤。
 
@@ -39,7 +39,6 @@ export default function SpiderChat({ goalTitle, apiKey, onSteps }) {
       content: '嗨！我是小蛛~ 🕷️ 告诉我你想达成什么目标，我帮你拆成小步骤！',
     },
   ])
-  const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [autoSent, setAutoSent] = useState(false)
   const chatRef = useRef(null)
@@ -108,34 +107,6 @@ export default function SpiderChat({ goalTitle, apiKey, onSteps }) {
     return data.choices[0].message.content
   }
 
-  async function handleSend() {
-    const msg = input.trim()
-    if (!msg || loading) return
-
-    const updated = [...messages, { role: 'user', content: msg }]
-    setMessages(updated)
-    setInput('')
-    setLoading(true)
-
-    try {
-      const reply = await callAI(updated)
-      setMessages([...updated, { role: 'assistant', content: reply }])
-      const steps = parseSteps(reply)
-      if (steps && steps.length >= 2) onSteps?.(steps)
-    } catch {
-      setMessages([...updated, { role: 'assistant', content: '哎呀，网络不太好…等会儿再试吧 🕸️' }])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
   return (
     <div style={{
       border: '1px solid rgba(255,255,255,0.08)',
@@ -145,7 +116,7 @@ export default function SpiderChat({ goalTitle, apiKey, onSteps }) {
     }}>
       {/* 消息区 */}
       <div ref={chatRef} style={{
-        height: 200, overflowY: 'auto', padding: '12px 14px',
+        height: 180, overflowY: 'auto', padding: '12px 14px',
         display: 'flex', flexDirection: 'column', gap: 10,
       }}>
         {messages.map((m, i) => {
@@ -185,37 +156,6 @@ export default function SpiderChat({ goalTitle, apiKey, onSteps }) {
             <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>小蛛正在思考…</span>
           </div>
         )}
-      </div>
-
-      {/* 输入区 */}
-      <div style={{
-        display: 'flex', borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: 8, gap: 8,
-      }}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="对小蛛说说你的想法…"
-          disabled={loading}
-          style={{
-            flex: 1, padding: '8px 12px', borderRadius: 8, border: 'none',
-            background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.85)',
-            fontSize: 13, fontFamily: 'inherit', fontWeight: 300, outline: 'none',
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={loading || !input.trim()}
-          style={{
-            padding: '8px 14px', borderRadius: 8, border: 'none',
-            background: input.trim() ? 'rgba(100,180,255,0.15)' : 'rgba(255,255,255,0.05)',
-            color: input.trim() ? 'rgba(180,210,255,0.8)' : 'rgba(255,255,255,0.2)',
-            fontSize: 13, fontFamily: 'inherit', fontWeight: 300,
-            cursor: input.trim() ? 'pointer' : 'default', whiteSpace: 'nowrap',
-          }}
-        >发送</button>
       </div>
     </div>
   )
