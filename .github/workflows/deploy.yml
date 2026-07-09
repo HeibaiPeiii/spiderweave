@@ -23,6 +23,8 @@ jobs:
         working-directory: web
       - run: npm run build
         working-directory: web
+        env:
+          VITE_DEEPSEEK_KEY: ${{ secrets.VITE_DEEPSEEK_KEY }}
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -21,9 +21,8 @@ export default function CreateWebModal({ onClose, onCreated }) {
   const [error, setError] = useState('')
   const titleRef = useRef(null)
 
-  // AI 拆解
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('ds_key') || '')
-  const [showKey, setShowKey] = useState(false)
+  // AI 拆解 — key 由构建时环境变量注入
+  const apiKey = import.meta.env.VITE_DEEPSEEK_KEY || ''
   const [aiLoading, setAiLoading] = useState(false)
 
   // 打开时聚焦名称输入框
@@ -84,7 +83,7 @@ export default function CreateWebModal({ onClose, onCreated }) {
       return
     }
     if (!apiKey) {
-      setShowKey(true)
+      setError('后台未配置 AI Key')
       return
     }
     setAiLoading(true)
@@ -94,7 +93,6 @@ export default function CreateWebModal({ onClose, onCreated }) {
         setError('AI 拆解结果不足 2 步，请手动补充')
         return
       }
-      // 用 AI 结果替换 steps，不足 MIN_STEPS 时补空位
       const padded = result.length < MIN_STEPS
         ? [...result, ...Array(MIN_STEPS - result.length).fill('')]
         : result
@@ -214,66 +212,8 @@ export default function CreateWebModal({ onClose, onCreated }) {
           }}
         />
 
-        {/* AI 拆解按钮 + Key 输入 */}
+        {/* AI 拆解按钮 */}
         <div style={{ marginBottom: 20 }}>
-          {!apiKey && showKey && (
-            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <input
-                type="password"
-                placeholder="输入 DeepSeek API Key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const trimmed = e.target.value.trim()
-                    if (trimmed) {
-                      localStorage.setItem('ds_key', trimmed)
-                      setApiKey(trimmed)
-                      setShowKey(false)
-                    }
-                  }
-                }}
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: 8,
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  background: 'rgba(255,255,255,0.04)',
-                  color: 'rgba(255,255,255,0.85)',
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  fontWeight: 300,
-                  outline: 'none',
-                }}
-              />
-              <button
-                onClick={() => {
-                  const trimmed = apiKey.trim()
-                  if (trimmed) {
-                    localStorage.setItem('ds_key', trimmed)
-                    setApiKey(trimmed)
-                    setShowKey(false)
-                  }
-                }}
-                disabled={!apiKey.trim()}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 8,
-                  border: 'none',
-                  background: apiKey.trim() ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                  color: apiKey.trim() ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  fontWeight: 300,
-                  cursor: apiKey.trim() ? 'pointer' : 'default',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                保存
-              </button>
-            </div>
-          )}
-
           <button
             onClick={handleAIDecompose}
             disabled={aiLoading || !title.trim()}
@@ -299,26 +239,8 @@ export default function CreateWebModal({ onClose, onCreated }) {
               gap: 8,
             }}
           >
-            {aiLoading ? (
-              <>⟳ AI 正在拆解…</>
-            ) : (
-              <>✨ AI 拆解{!apiKey && '（需设置 Key）'}</>
-            )}
+            {aiLoading ? '⟳ AI 正在拆解…' : '✨ AI 拆解'}
           </button>
-          {apiKey && (
-            <div
-              onClick={() => setShowKey(!showKey)}
-              style={{
-                fontSize: 11,
-                color: 'rgba(255,255,255,0.25)',
-                textAlign: 'right',
-                marginTop: 4,
-                cursor: 'pointer',
-              }}
-            >
-              Key 已保存 · 点击更换
-            </div>
-          )}
         </div>
 
         {/* 步骤拆解 */}
