@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSpider } from '../contexts/SpiderContext.jsx'
-import { aiDecompose } from '../utils/aiDecompose.js'
+import SpiderChat from './SpiderChat.jsx'
 
 const MAX_WEBS = 3
 const MIN_STEPS = 2
@@ -21,9 +21,8 @@ export default function CreateWebModal({ onClose, onCreated }) {
   const [error, setError] = useState('')
   const titleRef = useRef(null)
 
-  // AI 拆解 — key 由构建时环境变量注入
+  // AI 对话 — key 由构建时环境变量注入
   const apiKey = import.meta.env.VITE_DEEPSEEK_KEY || ''
-  const [aiLoading, setAiLoading] = useState(false)
 
   // 打开时聚焦名称输入框
   useEffect(() => {
@@ -74,34 +73,11 @@ export default function CreateWebModal({ onClose, onCreated }) {
     onCreated?.(webId)
   }
 
-  async function handleAIDecompose() {
-    setError('')
-    const goal = title.trim()
-    if (!goal) {
-      setError('请先输入目标名称')
-      titleRef.current?.focus()
-      return
-    }
-    if (!apiKey) {
-      setError('后台未配置 AI Key')
-      return
-    }
-    setAiLoading(true)
-    try {
-      const result = await aiDecompose(goal, apiKey)
-      if (result.length < 2) {
-        setError('AI 拆解结果不足 2 步，请手动补充')
-        return
-      }
-      const padded = result.length < MIN_STEPS
-        ? [...result, ...Array(MIN_STEPS - result.length).fill('')]
-        : result
-      setSteps(padded)
-    } catch (e) {
-      setError(e.message || 'AI 拆解失败')
-    } finally {
-      setAiLoading(false)
-    }
+  function handleStepsFromChat(newSteps) {
+    const padded = newSteps.length < MIN_STEPS
+      ? [...newSteps, ...Array(MIN_STEPS - newSteps.length).fill('')]
+      : newSteps.slice(0, MAX_STEPS)
+    setSteps(padded)
   }
 
   function handleOverlayClick(e) {
@@ -212,36 +188,14 @@ export default function CreateWebModal({ onClose, onCreated }) {
           }}
         />
 
-        {/* AI 拆解按钮 */}
-        <div style={{ marginBottom: 20 }}>
-          <button
-            onClick={handleAIDecompose}
-            disabled={aiLoading || !title.trim()}
-            style={{
-              width: '100%',
-              padding: '9px 0',
-              borderRadius: 10,
-              border: '1px solid rgba(100,180,255,0.2)',
-              background: aiLoading
-                ? 'rgba(100,180,255,0.05)'
-                : 'rgba(100,180,255,0.08)',
-              color: aiLoading
-                ? 'rgba(100,180,255,0.4)'
-                : 'rgba(100,180,255,0.7)',
-              fontSize: 14,
-              fontFamily: 'inherit',
-              fontWeight: 300,
-              cursor: aiLoading || !title.trim() ? 'default' : 'pointer',
-              transition: 'background 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            }}
-          >
-            {aiLoading ? '⟳ AI 正在拆解…' : '✨ AI 拆解'}
-          </button>
-        </div>
+        {/* 小蛛对话拆解 */}
+        {apiKey && (
+          <SpiderChat
+            goalTitle={title}
+            apiKey={apiKey}
+            onSteps={handleStepsFromChat}
+          />
+        )}
 
         {/* 步骤拆解 */}
         <label
