@@ -86,7 +86,7 @@ export default function HomePage({ onNavigate }) {
           onClick={() => onNavigate('habits')}
           style={{ background: 'rgba(255,255,255,0.04)' }}
         >
-          习 惯
+          每 日 织 网
         </button>
       </div>
 
