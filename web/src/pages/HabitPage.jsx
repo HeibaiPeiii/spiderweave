@@ -76,6 +76,49 @@ export default function HabitPage({ onNavigate }) {
         <div style={{ width: 40 }} />
       </div>
 
+      {/* 迷你习惯蛛网 SVG */}
+      {habits.length > 0 && (
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '0 20px 8px' }}>
+          <svg width="160" height="160" viewBox="-80 -80 160 160">
+            {/* 骨架线 — 每条习惯一根 */}
+            {habits.map((h, i) => {
+              const angle = (i * 360 / habits.length - 90) * Math.PI / 180
+              const ex = Math.cos(angle) * 70
+              const ey = Math.sin(angle) * 70
+              return (
+                <line key={h.id} x1={0} y1={0} x2={ex} y2={ey}
+                  stroke="rgba(255,255,255,0.08)" strokeWidth={1} strokeLinecap="round"
+                />
+              )
+            })}
+
+            {/* 过去 7 天的节点 — 每天一层 */}
+            {weekDays.map((date, di) => {
+              const r = 10 + di * 10 // 最外层=7天前，最内层=今天
+              return habits.map((h, hi) => {
+                const done = records.some((rec) => rec.habitId === h.id && rec.date === date)
+                if (!done) return null
+                const angle = (hi * 360 / habits.length - 90) * Math.PI / 180
+                const cx = Math.cos(angle) * r
+                const cy = Math.sin(angle) * r
+                const isToday = date === today
+                return (
+                  <circle key={`${h.id}-${date}`} cx={cx} cy={cy}
+                    r={isToday ? 3.5 : 2.5}
+                    fill={isToday ? 'rgba(100,255,150,0.5)' : 'rgba(100,255,150,0.25)'}
+                    stroke={isToday ? 'rgba(100,255,150,0.6)' : 'rgba(100,255,150,0.3)'}
+                    strokeWidth={0.5}
+                  />
+                )
+              })
+            })}
+
+            {/* 中心点 */}
+            <circle cx={0} cy={0} r={2} fill="rgba(255,255,255,0.3)" />
+          </svg>
+        </div>
+      )}
+
       {/* 今日习惯列表 */}
       <div style={{ flex: 1, width: '100%', maxWidth: 360, padding: '0 20px', overflowY: 'auto' }}>
         {habits.length === 0 && (
