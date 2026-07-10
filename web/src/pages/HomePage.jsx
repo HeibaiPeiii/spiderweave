@@ -1,14 +1,13 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useSpider } from '../contexts/SpiderContext.jsx'
 import Spider from '../components/Spider.jsx'
 import GreetingBubble from '../components/GreetingBubble.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
-/**
- * 首页
- */
 export default function HomePage({ onNavigate }) {
-  const { webs, state, greeting } = useSpider()
+  const { spider, webs, state, greeting, renameSpider } = useSpider()
+  const [spiderModal, setSpiderModal] = useState(false)
+  const [newName, setNewName] = useState('')
 
   // 拆分进行中 / 已完成
   const { activeWebs, completedWebs } = useMemo(() => {
@@ -42,7 +41,7 @@ export default function HomePage({ onNavigate }) {
     <div className="page" style={{ justifyContent: 'center', padding: '20px' }}>
       {/* 蜘蛛特写 */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
-        <Spider />
+        <Spider onClick={() => { setSpiderModal(true); setNewName(spider.name) }} />
       </div>
 
       {/* 打招呼气泡 */}
@@ -178,6 +177,88 @@ export default function HomePage({ onNavigate }) {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+      {/* 蜘蛛信息弹窗 */}
+      {spiderModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setSpiderModal(false) }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)',
+            padding: 20, animation: 'fadeIn 0.2s ease',
+          }}
+        >
+          <div style={{
+            width: '100%', maxWidth: 300, background: '#1e1e38',
+            borderRadius: 16, padding: '24px 22px', textAlign: 'center',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+            animation: 'fadeIn 0.25s ease',
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>🕷️</div>
+            <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.9)', fontWeight: 300, marginBottom: 4 }}>
+              {spider.name}
+            </p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>
+              {state === 'active' ? '🟢 元气满满' : state === 'hungry' ? '🟡 有点饿了' : '🔴 快撑不住了'}
+            </p>
+
+            {/* 改名 */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newName.trim()) {
+                    renameSpider(newName.trim())
+                    setSpiderModal(false)
+                  }
+                }}
+                placeholder="给蜘蛛起个名字"
+                maxLength={8}
+                style={{
+                  flex: 1, padding: '10px 12px', borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: 'rgba(255,255,255,0.85)', fontSize: 14,
+                  fontFamily: 'inherit', fontWeight: 300, outline: 'none',
+                }}
+              />
+              <button
+                onClick={() => {
+                  if (newName.trim()) {
+                    renameSpider(newName.trim())
+                    setSpiderModal(false)
+                  }
+                }}
+                disabled={!newName.trim()}
+                style={{
+                  padding: '10px 16px', borderRadius: 10, border: 'none',
+                  background: newName.trim() ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                  color: newName.trim() ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
+                  fontSize: 14, fontFamily: 'inherit', fontWeight: 300,
+                  cursor: newName.trim() ? 'pointer' : 'default', whiteSpace: 'nowrap',
+                }}
+              >
+                改名
+              </button>
+            </div>
+
+            <button
+              onClick={() => setSpiderModal(false)}
+              style={{
+                width: '100%', padding: '10px 0', borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.1)', background: 'transparent',
+                color: 'rgba(255,255,255,0.5)', fontSize: 14,
+                fontFamily: 'inherit', fontWeight: 300, cursor: 'pointer',
+                marginTop: 4,
+              }}
+            >
+              关闭
+            </button>
           </div>
         </div>
       )}

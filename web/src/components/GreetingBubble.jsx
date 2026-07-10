@@ -7,7 +7,7 @@ import { useSpider } from '../contexts/SpiderContext.jsx'
  * 每次渲染取随机文案，带淡入动画
  */
 export default function GreetingBubble() {
-  const { greeting } = useSpider()
+  const { spider, greeting } = useSpider()
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function GreetingBubble() {
           borderBottom: '6px solid rgba(255, 255, 255, 0.06)',
         }}
       />
-      💬 {greeting}
+      💬 {spider.name}：{greeting}
     </div>
   )
 }

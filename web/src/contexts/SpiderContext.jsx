@@ -175,6 +175,14 @@ export function SpiderProvider({ children }) {
     }))
   }, [updateData])
 
+  /** 蜘蛛改名 */
+  const renameSpider = useCallback((name) => {
+    updateData((prev) => ({
+      ...prev,
+      spider: { ...prev.spider, name },
+    }))
+  }, [updateData])
+
   // --- 习惯网 actions ---
 
   const addHabit = useCallback((name) => {
@@ -242,7 +250,8 @@ export function SpiderProvider({ children }) {
     addHabit,
     removeHabit,
     toggleHabit,
-  }), [data, derived, feedSpider, createWeb, completeStep, addStep, deleteWeb, addHabit, removeHabit, toggleHabit])
+    renameSpider,
+  }), [data, derived, feedSpider, createWeb, completeStep, addStep, deleteWeb, addHabit, removeHabit, toggleHabit, renameSpider])
 
   return (
     <SpiderContext.Provider value={value}>

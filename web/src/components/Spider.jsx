@@ -18,7 +18,7 @@ function lerpColor(c1, c2, t) {
 /**
  * 蜘蛛 SVG — 可爱风格 + 由远及近入场动画
  */
-export default function Spider() {
+export default function Spider({ onClick }) {
   const { hunger } = useSpider()
 
   // 入场动画：0 → 1
@@ -63,9 +63,11 @@ export default function Spider() {
 
   return (
     <div
+      onClick={onClick}
       style={{
         width: size,
         height: size,
+        cursor: onClick ? 'pointer' : 'default',
         animation: isShrunk
           ? `shake ${style.animationDuration}s ease-in-out infinite`
           : `float ${style.animationDuration}s ease-in-out infinite`,

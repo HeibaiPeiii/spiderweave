@@ -4,6 +4,7 @@ const STORAGE_KEY = 'spiderweave_data'
 
 const DEFAULT_DATA = {
   spider: {
+    name: '小蛛',
     hunger: 100,
     lastFedAt: Date.now(),
   },
