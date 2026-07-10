@@ -25,6 +25,8 @@ export default function HabitPage({ onNavigate }) {
   const { habits, records } = habitWeb || { habits: [], records: [] }
 
   const [newName, setNewName] = useState('')
+  const [animatingThreadId, setAnimatingThreadId] = useState(null)
+  const [lastDoneThreadId, setLastDoneThreadId] = useState(null)
   const today = todayStr()
 
   // 今日完成状态
@@ -61,7 +63,16 @@ export default function HabitPage({ onNavigate }) {
   }
 
   function handleToggle(habitId) {
+    const wasDone = isDoneToday(habitId)
     toggleHabit(habitId, today)
+    // 仅完成时触发爬行动画
+    if (!wasDone) {
+      setAnimatingThreadId(habitId)
+      setLastDoneThreadId(habitId)
+      setTimeout(() => setAnimatingThreadId(null), 700)
+    } else {
+      setLastDoneThreadId(null)
+    }
   }
 
   function handleKeyDown(e) {
@@ -95,7 +106,12 @@ export default function HabitPage({ onNavigate }) {
         padding: '0 10px',
       }}>
         {habits.length > 0 ? (
-          <WebSvg web={habitWebData} breakage="intact" />
+          <WebSvg
+            web={habitWebData}
+            breakage="intact"
+            animatingThreadId={animatingThreadId}
+            lastDoneThreadId={lastDoneThreadId}
+          />
         ) : (
           <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 14 }}>
             添加习惯后，这里会出现你的习惯网 🕸️

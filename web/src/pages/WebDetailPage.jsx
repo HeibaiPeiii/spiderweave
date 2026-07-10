@@ -19,6 +19,7 @@ export default function WebDetailPage({ webId, onNavigate }) {
   const [animatingThreadId, setAnimatingThreadId] = useState(null)
   const [lastDoneThreadId, setLastDoneThreadId] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
 
   // ---- 模式 B：新建网 ----
   if (!webId) {
@@ -55,10 +56,17 @@ export default function WebDetailPage({ webId, onNavigate }) {
     if (!confirmThread) return
     completeStep(webId, confirmThread)
     setConfirmThread(null)
-    // 触发织丝动画 + 标记最后完成的丝线（停留蜘蛛位置）
     setAnimatingThreadId(confirmThread)
     setLastDoneThreadId(confirmThread)
     setTimeout(() => setAnimatingThreadId(null), 700)
+
+    // 检查是否全部完成 → 庆祝
+    const isLastThread = web.threads.filter((t) => t.status !== 'done').length === 1
+      && web.threads.find((t) => t.id === confirmThread)?.status === 'todo'
+    if (isLastThread) {
+      setTimeout(() => setCelebrating(true), 800)
+      setTimeout(() => setCelebrating(false), 4000)
+    }
   }
 
   return (
@@ -272,6 +280,36 @@ export default function WebDetailPage({ webId, onNavigate }) {
                 删除
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 完成庆祝 */}
+      {celebrating && (
+        <div
+          onClick={() => setCelebrating(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
+            padding: 20, animation: 'fadeIn 0.4s ease',
+          }}
+        >
+          <div style={{
+            textAlign: 'center', animation: 'fadeIn 0.6s ease',
+          }}>
+            <div style={{ fontSize: 64, marginBottom: 16, animation: 'float 2s ease-in-out infinite' }}>
+              🕸️
+            </div>
+            <p style={{ fontSize: 22, color: 'rgba(255,255,255,0.9)', fontWeight: 300, marginBottom: 8 }}>
+              🎉 织完了！
+            </p>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 24 }}>
+              「{web.title}」已经是一张完整的网了
+            </p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
+              点击任意处关闭
+            </p>
           </div>
         </div>
       )}
