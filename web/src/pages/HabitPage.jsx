@@ -113,8 +113,42 @@ export default function HabitPage({ onNavigate }) {
               })
             })}
 
+            {/* 小蜘蛛 — 停在今天最后完成的节点附近 */}
+            {(() => {
+              // 找到今天最后完成的习惯对应的骨架角度
+              let lastAngle = 0
+              for (let i = habits.length - 1; i >= 0; i--) {
+                if (records.some((r) => r.habitId === habits[i].id && r.date === today)) {
+                  lastAngle = (i * 360 / habits.length - 90) * Math.PI / 180
+                  break
+                }
+              }
+              const todayR = 10 + 6 * 10 // 今天的环半径
+              const sx = Math.cos(lastAngle) * todayR
+              const sy = Math.sin(lastAngle) * todayR
+
+              return (
+                <g transform={`translate(${sx}, ${sy})`}>
+                  {/* 腿 */}
+                  {[-130, -90, -50, 50, 90, 130].map((a, i) => {
+                    const rad = (a * Math.PI) / 180
+                    return (
+                      <line key={i} x1={0} y1={0}
+                        x2={Math.cos(rad) * 5} y2={Math.sin(rad) * 5}
+                        stroke="rgba(255,255,255,0.5)" strokeWidth={0.5} strokeLinecap="round"
+                      />
+                    )
+                  })}
+                  {/* 身体 */}
+                  <ellipse cx={0} cy={0} rx={2.5} ry={1.8} fill="rgba(255,255,255,0.6)" />
+                  {/* 头 */}
+                  <circle cx={3} cy={0} r={1.5} fill="rgba(255,255,255,0.6)" />
+                </g>
+              )
+            })()}
+
             {/* 中心点 */}
-            <circle cx={0} cy={0} r={2} fill="rgba(255,255,255,0.3)" />
+            <circle cx={0} cy={0} r={2} fill="rgba(255,255,255,0.2)" />
           </svg>
         </div>
       )}
