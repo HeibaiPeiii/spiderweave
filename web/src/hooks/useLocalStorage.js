@@ -8,6 +8,10 @@ const DEFAULT_DATA = {
     lastFedAt: Date.now(),
   },
   webs: [],
+  habitWeb: {
+    habits: [],
+    records: [],
+  },
 }
 
 /**
@@ -23,6 +27,10 @@ export function loadData() {
     return {
       spider: { ...DEFAULT_DATA.spider, ...(parsed.spider || {}) },
       webs: parsed.webs || [],
+      habitWeb: {
+        habits: parsed.habitWeb?.habits || [],
+        records: parsed.habitWeb?.records || [],
+      },
     }
   } catch {
     return structuredClone(DEFAULT_DATA)

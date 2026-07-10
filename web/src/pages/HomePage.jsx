@@ -81,6 +81,13 @@ export default function HomePage({ onNavigate }) {
         <button className="btn" onClick={() => onNavigate('webDetail', null)}>
           建 一 张 新 网
         </button>
+        <button
+          className="btn"
+          onClick={() => onNavigate('habits')}
+          style={{ background: 'rgba(255,255,255,0.04)' }}
+        >
+          习 惯
+        </button>
       </div>
 
       {/* 进行中的网 */}

@@ -175,10 +175,60 @@ export function SpiderProvider({ children }) {
     }))
   }, [updateData])
 
+  // --- 习惯网 actions ---
+
+  const addHabit = useCallback((name) => {
+    updateData((prev) => ({
+      ...prev,
+      habitWeb: {
+        ...prev.habitWeb,
+        habits: [...prev.habitWeb.habits, { id: genId(), name, createdAt: Date.now() }],
+      },
+    }))
+  }, [updateData])
+
+  const removeHabit = useCallback((habitId) => {
+    updateData((prev) => ({
+      ...prev,
+      habitWeb: {
+        ...prev.habitWeb,
+        habits: prev.habitWeb.habits.filter((h) => h.id !== habitId),
+        records: prev.habitWeb.records.filter((r) => r.habitId !== habitId),
+      },
+    }))
+  }, [updateData])
+
+  const toggleHabit = useCallback((habitId, dateStr) => {
+    const now = Date.now()
+    updateData((prev) => {
+      const records = prev.habitWeb.records || []
+      const existing = records.find((r) => r.habitId === habitId && r.date === dateStr)
+      let newRecords
+      if (existing) {
+        // 取消完成
+        newRecords = records.filter((r) => r !== existing)
+      } else {
+        // 标记完成
+        newRecords = [...records, { habitId, date: dateStr, status: 'done' }]
+      }
+      return {
+        ...prev,
+        habitWeb: { ...prev.habitWeb, records: newRecords },
+      }
+    })
+    // 习惯完成也喂蜘蛛（仅完成时，取消时不喂）
+    const prevRecords = data.habitWeb?.records || []
+    const alreadyDone = prevRecords.some((r) => r.habitId === habitId && r.date === dateStr)
+    if (!alreadyDone) {
+      feedSpider()
+    }
+  }, [updateData, feedSpider, data.habitWeb?.records])
+
   const value = useMemo(() => ({
     // 原始数据
     spider: data.spider,
     webs: data.webs,
+    habitWeb: data.habitWeb,
 
     // 派生数据（基于当前时间计算）
     ...derived,
@@ -189,7 +239,10 @@ export function SpiderProvider({ children }) {
     completeStep,
     addStep,
     deleteWeb,
-  }), [data, derived, feedSpider, createWeb, completeStep, addStep, deleteWeb])
+    addHabit,
+    removeHabit,
+    toggleHabit,
+  }), [data, derived, feedSpider, createWeb, completeStep, addStep, deleteWeb, addHabit, removeHabit, toggleHabit])
 
   return (
     <SpiderContext.Provider value={value}>

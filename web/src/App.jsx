@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { SpiderProvider } from './contexts/SpiderContext.jsx'
 import HomePage from './pages/HomePage.jsx'
 import WebDetailPage from './pages/WebDetailPage.jsx'
+import HabitPage from './pages/HabitPage.jsx'
 
 /**
  * 根组件 — 页面路由（state 切换）
  *
- * currentPage: 'home' | 'webDetail'
+ * currentPage: 'home' | 'webDetail' | 'habits'
  * selectedWebId: string | null（null 表示新建）
  */
 function App() {
@@ -28,6 +29,9 @@ function App() {
           webId={selectedWebId}
           onNavigate={handleNavigate}
         />
+      )}
+      {currentPage === 'habits' && (
+        <HabitPage onNavigate={handleNavigate} />
       )}
     </SpiderProvider>
   )
