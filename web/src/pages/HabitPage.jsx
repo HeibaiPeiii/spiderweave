@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useSpider } from '../contexts/SpiderContext.jsx'
+import WebSvg from '../components/WebSvg.jsx'
 
 function todayStr() {
   const d = new Date()
@@ -12,13 +13,12 @@ function fmtDate(dateStr) {
 }
 
 function dayLabel(dateStr) {
-  const d = new Date(dateStr)
   const days = ['日', '一', '二', '三', '四', '五', '六']
-  return days[d.getDay()]
+  return days[new Date(dateStr).getDay()]
 }
 
 /**
- * 习惯网页 — 日常习惯打卡
+ * 习惯网页 — 用同款蛛网展示每日习惯进度
  */
 export default function HabitPage({ onNavigate }) {
   const { habitWeb, addHabit, removeHabit, toggleHabit } = useSpider()
@@ -31,6 +31,20 @@ export default function HabitPage({ onNavigate }) {
   function isDoneToday(habitId) {
     return records.some((r) => r.habitId === habitId && r.date === today)
   }
+
+  // 把习惯映射成目标网格式的 web 对象 → 复用 WebSvg
+  const habitWebData = useMemo(() => ({
+    id: 'habits',
+    title: '习惯网',
+    threads: habits.map((h, i) => ({
+      id: h.id,
+      title: h.name,
+      status: isDoneToday(h.id) ? 'done' : 'todo',
+      skeletonIndex: i % 6,
+      layerIndex: 0,
+      completedAt: null,
+    })),
+  }), [habits, records, today])
 
   // 过去 7 天
   const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -69,157 +83,85 @@ export default function HabitPage({ onNavigate }) {
         </button>
         <div style={{ textAlign: 'center' }}>
           <h2 style={{ fontSize: 17, fontWeight: 300 }}>习惯网</h2>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
-            {todayStr()}
-          </span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{todayStr()}</span>
         </div>
         <div style={{ width: 40 }} />
       </div>
 
-      {/* 迷你习惯蛛网 SVG */}
-      {habits.length > 0 && (
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '0 20px 8px' }}>
-          <svg width="160" height="160" viewBox="-80 -80 160 160">
-            {/* 骨架线 — 每条习惯一根 */}
-            {habits.map((h, i) => {
-              const angle = (i * 360 / habits.length - 90) * Math.PI / 180
-              const ex = Math.cos(angle) * 70
-              const ey = Math.sin(angle) * 70
-              return (
-                <line key={h.id} x1={0} y1={0} x2={ex} y2={ey}
-                  stroke="rgba(255,255,255,0.08)" strokeWidth={1} strokeLinecap="round"
-                />
-              )
-            })}
-
-            {/* 过去 7 天的节点 — 每天一层 */}
-            {weekDays.map((date, di) => {
-              const r = 10 + di * 10 // 最外层=7天前，最内层=今天
-              return habits.map((h, hi) => {
-                const done = records.some((rec) => rec.habitId === h.id && rec.date === date)
-                if (!done) return null
-                const angle = (hi * 360 / habits.length - 90) * Math.PI / 180
-                const cx = Math.cos(angle) * r
-                const cy = Math.sin(angle) * r
-                const isToday = date === today
-                return (
-                  <circle key={`${h.id}-${date}`} cx={cx} cy={cy}
-                    r={isToday ? 3.5 : 2.5}
-                    fill={isToday ? 'rgba(100,255,150,0.5)' : 'rgba(100,255,150,0.25)'}
-                    stroke={isToday ? 'rgba(100,255,150,0.6)' : 'rgba(100,255,150,0.3)'}
-                    strokeWidth={0.5}
-                  />
-                )
-              })
-            })}
-
-            {/* 小蜘蛛 — 停在今天最后完成的节点附近 */}
-            {(() => {
-              // 找到今天最后完成的习惯对应的骨架角度
-              let lastAngle = 0
-              for (let i = habits.length - 1; i >= 0; i--) {
-                if (records.some((r) => r.habitId === habits[i].id && r.date === today)) {
-                  lastAngle = (i * 360 / habits.length - 90) * Math.PI / 180
-                  break
-                }
-              }
-              const todayR = 10 + 6 * 10 // 今天的环半径
-              const sx = Math.cos(lastAngle) * todayR
-              const sy = Math.sin(lastAngle) * todayR
-
-              return (
-                <g transform={`translate(${sx}, ${sy})`}>
-                  {/* 腿 */}
-                  {[-130, -90, -50, 50, 90, 130].map((a, i) => {
-                    const rad = (a * Math.PI) / 180
-                    return (
-                      <line key={i} x1={0} y1={0}
-                        x2={Math.cos(rad) * 5} y2={Math.sin(rad) * 5}
-                        stroke="rgba(255,255,255,0.5)" strokeWidth={0.5} strokeLinecap="round"
-                      />
-                    )
-                  })}
-                  {/* 身体 */}
-                  <ellipse cx={0} cy={0} rx={2.5} ry={1.8} fill="rgba(255,255,255,0.6)" />
-                  {/* 头 */}
-                  <circle cx={3} cy={0} r={1.5} fill="rgba(255,255,255,0.6)" />
-                </g>
-              )
-            })()}
-
-            {/* 中心点 */}
-            <circle cx={0} cy={0} r={2} fill="rgba(255,255,255,0.2)" />
-          </svg>
-        </div>
-      )}
-
-      {/* 今日习惯列表 */}
-      <div style={{ flex: 1, width: '100%', maxWidth: 360, padding: '0 20px', overflowY: 'auto' }}>
-        {habits.length === 0 && (
-          <p style={{
-            textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14,
-            marginTop: 40,
-          }}>
-            还没有习惯，添加第一个吧
+      {/* 蛛网 — 和目标网同款 WebSvg */}
+      <div style={{
+        flex: 1, width: '100%', minHeight: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '0 10px',
+      }}>
+        {habits.length > 0 ? (
+          <WebSvg web={habitWebData} breakage="intact" />
+        ) : (
+          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 14 }}>
+            添加习惯后，这里会出现你的习惯网 🕸️
           </p>
         )}
+      </div>
 
-        {habits.map((habit) => {
-          const done = isDoneToday(habit.id)
-          return (
-            <div
-              key={habit.id}
-              onClick={() => handleToggle(habit.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '12px 14px', marginBottom: 6, borderRadius: 10,
-                background: done ? 'rgba(100,255,150,0.05)' : 'rgba(255,255,255,0.04)',
-                cursor: 'pointer', transition: 'background 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = done ? 'rgba(100,255,150,0.08)' : 'rgba(255,255,255,0.07)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = done ? 'rgba(100,255,150,0.05)' : 'rgba(255,255,255,0.04)' }}
-            >
-              {/* 勾选框 */}
-              <div style={{
-                width: 22, height: 22, borderRadius: '50%',
-                border: done ? '2px solid rgba(100,255,150,0.5)' : '2px solid rgba(255,255,255,0.2)',
-                background: done ? 'rgba(100,255,150,0.2)' : 'transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0, fontSize: 12,
-                color: done ? 'rgba(100,255,150,0.8)' : 'transparent',
-                transition: 'all 0.2s ease',
-              }}>
-                ✓
-              </div>
-
-              <span style={{
-                flex: 1, fontSize: 15,
-                color: done ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.8)',
-                textDecoration: done ? 'line-through' : 'none',
-                transition: 'color 0.2s ease',
-              }}>
-                {habit.name}
-              </span>
-
-              {/* 删除 */}
-              <button
-                onClick={(e) => { e.stopPropagation(); removeHabit(habit.id) }}
+      {/* 习惯列表 */}
+      <div style={{
+        width: '100%', display: 'flex', justifyContent: 'center',
+        padding: '12px 20px 8px', maxHeight: '35%', overflowY: 'auto',
+      }}>
+        <div style={{ width: '100%', maxWidth: 360 }}>
+          {habits.map((habit) => {
+            const done = isDoneToday(habit.id)
+            return (
+              <div
+                key={habit.id}
+                onClick={() => handleToggle(habit.id)}
                 style={{
-                  background: 'none', border: 'none',
-                  color: 'rgba(255,255,255,0.15)', fontSize: 16,
-                  cursor: 'pointer', padding: '2px 4px',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 14px', marginBottom: 6, borderRadius: 10,
+                  background: done ? 'rgba(100,255,150,0.05)' : 'rgba(255,255,255,0.04)',
+                  cursor: 'pointer', transition: 'background 0.2s ease',
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = done ? 'rgba(100,255,150,0.08)' : 'rgba(255,255,255,0.07)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = done ? 'rgba(100,255,150,0.05)' : 'rgba(255,255,255,0.04)' }}
               >
-                ×
-              </button>
-            </div>
-          )
-        })}
+                <div style={{
+                  width: 22, height: 22, borderRadius: '50%',
+                  border: done ? '2px solid rgba(100,255,150,0.5)' : '2px solid rgba(255,255,255,0.2)',
+                  background: done ? 'rgba(100,255,150,0.2)' : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, fontSize: 12,
+                  color: done ? 'rgba(100,255,150,0.8)' : 'transparent',
+                  transition: 'all 0.2s ease',
+                }}>
+                  ✓
+                </div>
+                <span style={{
+                  flex: 1, fontSize: 15,
+                  color: done ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.8)',
+                  textDecoration: done ? 'line-through' : 'none',
+                  transition: 'color 0.2s ease',
+                }}>
+                  {habit.name}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeHabit(habit.id) }}
+                  style={{
+                    background: 'none', border: 'none',
+                    color: 'rgba(255,255,255,0.15)', fontSize: 16,
+                    cursor: 'pointer', padding: '2px 4px',
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* 添加习惯 */}
       <div style={{
-        width: '100%', maxWidth: 360, padding: '8px 20px 12px',
+        width: '100%', maxWidth: 360, padding: '0 20px 8px',
         display: 'flex', gap: 8,
       }}>
         <input
@@ -254,12 +196,10 @@ export default function HabitPage({ onNavigate }) {
 
       {/* 周视图 */}
       <div style={{
-        width: '100%', maxWidth: 360, padding: '12px 20px 20px',
+        width: '100%', maxWidth: 360, padding: '8px 20px 20px',
         borderTop: '1px solid rgba(255,255,255,0.05)',
       }}>
-        <p className="text-secondary" style={{ fontSize: 12, marginBottom: 10 }}>
-          过去 7 天
-        </p>
+        <p className="text-secondary" style={{ fontSize: 12, marginBottom: 10 }}>过去 7 天</p>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {weekDays.map((date) => {
             const allDone = habits.length > 0 && habits.every((h) =>
@@ -286,12 +226,8 @@ export default function HabitPage({ onNavigate }) {
                 }}>
                   {allDone ? '✓' : someDone ? '·' : ''}
                 </div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
-                  {dayLabel(date)}
-                </div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
-                  {fmtDate(date)}
-                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{dayLabel(date)}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{fmtDate(date)}</div>
               </div>
             )
           })}
