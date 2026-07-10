@@ -49,6 +49,7 @@ export default function WebSvg({ web, breakage, animatingThreadId, lastDoneThrea
   // --- 拖拽 ---
   function handlePointerDown(e) {
     if (e.button !== 0) return
+    e.stopPropagation()
     e.currentTarget.setPointerCapture(e.pointerId)
     dragRef.current = {
       startX: e.clientX,
@@ -60,6 +61,7 @@ export default function WebSvg({ web, breakage, animatingThreadId, lastDoneThrea
 
   function handlePointerMove(e) {
     if (!dragRef.current) return
+    e.stopPropagation()
     const dx = e.clientX - dragRef.current.startX
     const dy = e.clientY - dragRef.current.startY
     setTransform((prev) => ({
@@ -69,7 +71,8 @@ export default function WebSvg({ web, breakage, animatingThreadId, lastDoneThrea
     }))
   }
 
-  function handlePointerUp() {
+  function handlePointerUp(e) {
+    e.stopPropagation()
     dragRef.current = null
   }
 
