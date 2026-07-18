@@ -99,7 +99,7 @@ function SpiderLegs({ t, legSpeed, legAmp, useCSS }) {
 /**
  * 丝线节点 — 环状线段，完成时蜘蛛爬行织丝。
  */
-export default function ThreadNode({ x, y, nextX, nextY, status, justCompleted, isLastDone }) {
+export default function ThreadNode({ x, y, nextX, nextY, status, justCompleted, isLastDone, title }) {
   const isDone = status === 'done'
   const angle = Math.atan2(nextY - y, nextX - x) * (180 / Math.PI)
   const [crawlDone, setCrawlDone] = useState(false)
@@ -111,6 +111,8 @@ export default function ThreadNode({ x, y, nextX, nextY, status, justCompleted, 
 
   return (
     <g>
+      {title && <title>{title}{isDone ? ' ✓' : ''}</title>}
+
       {/* todo 虚线 */}
       {!isDone && (
         <line

@@ -137,8 +137,8 @@ export default function WebSvg({ web, breakage, animatingThreadId, lastDoneThrea
               key={`skel-${si}`}
               x1={0} y1={0}
               x2={ex} y2={ey}
-              stroke="rgba(255,255,255,0.07)"
-              strokeWidth={1}
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth={0.5}
               strokeDasharray={isFrayed ? '6 5' : 'none'}
               strokeLinecap="round"
             />
@@ -180,6 +180,7 @@ export default function WebSvg({ web, breakage, animatingThreadId, lastDoneThrea
                 status={thread.status}
                 justCompleted={justCompleted}
                 isLastDone={thread.id === lastDoneThreadId}
+                title={thread.title}
               />
             </g>
           )
