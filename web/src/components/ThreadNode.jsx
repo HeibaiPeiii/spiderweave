@@ -145,21 +145,19 @@ export default function ThreadNode({ x, y, nextX, nextY, status, justCompleted, 
         />
       )}
 
-      {/* 蜘蛛 */}
+      {/* 蜘蛛 — 爬行和待机同时存在，opacity 切换，无闪烁 */}
       {isLastDone && isDone && (
         <>
-          {/* 爬行阶段 */}
-          {justCompleted && !crawlDone && (
+          <g opacity={justCompleted && !crawlDone ? 1 : 0} style={{ transition: 'opacity 0.15s' }}>
             <CrawlingSpider
               fromX={x} fromY={y}
               toX={nextX} toY={nextY}
               onDone={() => setCrawlDone(true)}
             />
-          )}
-          {/* 待机阶段 */}
-          {(!justCompleted || crawlDone) && (
+          </g>
+          <g opacity={!justCompleted || crawlDone ? 1 : 0} style={{ transition: 'opacity 0.15s' }}>
             <IdleSpider x={nextX} y={nextY} angle={angle} />
-          )}
+          </g>
         </>
       )}
     </g>
