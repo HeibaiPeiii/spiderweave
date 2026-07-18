@@ -5,7 +5,7 @@ import GreetingBubble from '../components/GreetingBubble.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
 export default function HomePage({ onNavigate }) {
-  const { spider, webs, state, greeting, renameSpider } = useSpider()
+  const { spider, webs, state, greeting, renameSpider, stats } = useSpider()
   const [spiderModal, setSpiderModal] = useState(false)
   const [newName, setNewName] = useState('')
 
@@ -201,9 +201,38 @@ export default function HomePage({ onNavigate }) {
             <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.9)', fontWeight: 300, marginBottom: 4 }}>
               {spider.name}
             </p>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>
               {state === 'active' ? '🟢 元气满满' : state === 'hungry' ? '🟡 有点饿了' : '🔴 快撑不住了'}
             </p>
+
+            {/* 数据统计 */}
+            {stats && (
+              <div style={{
+                display: 'flex', justifyContent: 'center', gap: 24,
+                marginBottom: 16, padding: '10px 0',
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', fontWeight: 300 }}>
+                    {stats.totalThreads}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>已织丝线</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', fontWeight: 300 }}>
+                    {stats.websDone}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>织完的网</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', fontWeight: 300 }}>
+                    {stats.streak}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>连续天数</div>
+                </div>
+              </div>
+            )}
 
             {/* 改名 */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>

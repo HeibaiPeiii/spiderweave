@@ -68,14 +68,53 @@ export function SpiderProvider({ children }) {
     const state = getSpiderState(hunger)
     const breakage = getBreakage(data.spider.lastFedAt, now)
 
+    // 统计数据
+    let totalThreads = 0
+    let websDone = 0
+    const allDates = new Set()
+    for (const w of data.webs) {
+      for (const t of w.threads) {
+        if (t.status === 'done') {
+          totalThreads++
+          if (t.completedAt) {
+            const d = new Date(t.completedAt)
+            allDates.add(`${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`)
+          }
+        }
+      }
+      if (w.threads.length > 0 && w.threads.every((t) => t.status === 'done')) {
+        websDone++
+      }
+    }
+    // 习惯完成天数
+    for (const r of data.habitWeb?.records || []) {
+      if (r.status === 'done') allDates.add(r.date)
+    }
+    // 连续打卡天数（从今天往前数）
+    let streak = 0
+    const today = new Date()
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      if (allDates.has(ds)) streak++
+      else break
+    }
+
     return {
       hunger,
       state,
       breakage,
       greeting: getGreeting(state),
       now,
+      stats: {
+        totalThreads,
+        websDone,
+        activeDays: allDates.size,
+        streak,
+      },
     }
-  }, [data.spider.lastFedAt])
+  }, [data.spider.lastFedAt, data.webs, data.habitWeb])
 
   // --- Actions ---
 
