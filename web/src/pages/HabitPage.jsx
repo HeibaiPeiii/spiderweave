@@ -34,26 +34,30 @@ export default function HabitPage({ onNavigate }) {
     return records.some((r) => r.habitId === habitId && r.date === today)
   }
 
-  // 把习惯映射成目标网格式的 web 对象 → 复用 WebSvg
-  const habitWebData = useMemo(() => ({
-    id: 'habits',
-    title: '习惯网',
-    threads: habits.map((h, i) => ({
-      id: h.id,
-      title: h.name,
-      status: isDoneToday(h.id) ? 'done' : 'todo',
-      skeletonIndex: i % 6,
-      layerIndex: 0,
-      completedAt: null,
-    })),
-  }), [habits, records, today])
-
-  // 过去 7 天
+  // 习惯网 — 7 层同心环（内=今天，外=7天前）
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - (6 - i))
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   })
+
+  const habitWebData = useMemo(() => {
+    const threads = []
+    habits.forEach((h, hi) => {
+      weekDays.forEach((date, di) => {
+        const done = records.some((r) => r.habitId === h.id && r.date === date)
+        threads.push({
+          id: `${h.id}-${date}`,
+          title: `${h.name}（${fmtDate(date)}）`,
+          status: done ? 'done' : 'todo',
+          skeletonIndex: hi % 6,
+          layerIndex: 6 - di, // 0=最外(7天前), 6=最内(今天)
+          completedAt: null,
+        })
+      })
+    })
+    return { id: 'habits', title: '习惯网', threads }
+  }, [habits, records, weekDays])
 
   function handleAdd() {
     const name = newName.trim()

@@ -181,6 +181,24 @@ export function SpiderProvider({ children }) {
     feedSpider()
   }, [updateData, feedSpider])
 
+  /** 撤销步骤完成 */
+  const undoStep = useCallback((webId, threadId) => {
+    updateData((prev) => ({
+      ...prev,
+      webs: prev.webs.map((web) => {
+        if (web.id !== webId) return web
+        return {
+          ...web,
+          threads: web.threads.map((t) =>
+            t.id === threadId
+              ? { ...t, status: 'todo', completedAt: null }
+              : t
+          ),
+        }
+      }),
+    }))
+  }, [updateData])
+
   /** 向已有网添加新步骤 */
   const addStep = useCallback((webId, title) => {
     updateData((prev) => {
@@ -284,13 +302,14 @@ export function SpiderProvider({ children }) {
     feedSpider,
     createWeb,
     completeStep,
+    undoStep,
     addStep,
     deleteWeb,
     addHabit,
     removeHabit,
     toggleHabit,
     renameSpider,
-  }), [data, derived, feedSpider, createWeb, completeStep, addStep, deleteWeb, addHabit, removeHabit, toggleHabit, renameSpider])
+  }), [data, derived, feedSpider, createWeb, completeStep, undoStep, addStep, deleteWeb, addHabit, removeHabit, toggleHabit, renameSpider])
 
   return (
     <SpiderContext.Provider value={value}>

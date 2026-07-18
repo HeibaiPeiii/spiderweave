@@ -12,11 +12,12 @@ import CreateWebModal from '../components/CreateWebModal.jsx'
  *   B. webId 为 null → 渲染 CreateWebModal（新建网流程）
  */
 export default function WebDetailPage({ webId, onNavigate }) {
-  const { webs, breakage, completeStep, addStep, deleteWeb } = useSpider()
+  const { webs, breakage, completeStep, undoStep, addStep, deleteWeb } = useSpider()
 
   // 完成确认弹窗 + 织丝动画 + 最后完成的丝线
   const [confirmThread, setConfirmThread] = useState(null)
   const [animatingThreadId, setAnimatingThreadId] = useState(null)
+  const [lastAction, setLastAction] = useState(null) // { threadId, timer }
   const [lastDoneThreadId, setLastDoneThreadId] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
@@ -60,6 +61,11 @@ export default function WebDetailPage({ webId, onNavigate }) {
     setLastDoneThreadId(confirmThread)
     setTimeout(() => setAnimatingThreadId(null), 700)
 
+    // 撤销提示
+    clearTimeout(lastAction?.timer)
+    const timer = setTimeout(() => setLastAction(null), 4000)
+    setLastAction({ threadId: confirmThread, timer })
+
     // 检查是否全部完成 → 庆祝
     const isLastThread = web.threads.filter((t) => t.status !== 'done').length === 1
       && web.threads.find((t) => t.id === confirmThread)?.status === 'todo'
@@ -67,6 +73,15 @@ export default function WebDetailPage({ webId, onNavigate }) {
       setTimeout(() => setCelebrating(true), 800)
       setTimeout(() => setCelebrating(false), 4000)
     }
+  }
+
+  function handleUndo() {
+    if (!lastAction) return
+    undoStep(webId, lastAction.threadId)
+    setLastDoneThreadId(null)
+    setAnimatingThreadId(null)
+    clearTimeout(lastAction.timer)
+    setLastAction(null)
   }
 
   return (
@@ -280,6 +295,35 @@ export default function WebDetailPage({ webId, onNavigate }) {
                 删除
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 撤销提示 */}
+      {lastAction && (
+        <div style={{
+          position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 150, animation: 'fadeIn 0.3s ease',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 20px', borderRadius: 20,
+            background: 'rgba(30,30,50,0.95)', border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          }}>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+              步骤已完成
+            </span>
+            <button
+              onClick={handleUndo}
+              style={{
+                padding: '6px 14px', borderRadius: 12, border: 'none',
+                background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)',
+                fontSize: 13, fontFamily: 'inherit', fontWeight: 300, cursor: 'pointer',
+              }}
+            >
+              撤销
+            </button>
           </div>
         </div>
       )}
