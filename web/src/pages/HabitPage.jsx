@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useSpider } from '../contexts/SpiderContext.jsx'
+import { playCheck } from '../utils/sound.js'
 import WebSvg from '../components/WebSvg.jsx'
 
 function todayStr() {
@@ -71,6 +72,7 @@ export default function HabitPage({ onNavigate }) {
     toggleHabit(habitId, today)
     // 仅完成时触发爬行动画
     if (!wasDone) {
+      playCheck()
       setAnimatingThreadId(habitId)
       setLastDoneThreadId(habitId)
       setTimeout(() => setAnimatingThreadId(null), 700)

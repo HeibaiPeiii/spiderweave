@@ -60,10 +60,17 @@ export default function Spider({ onClick }) {
   const size = 150
   const half = size / 2
   const isShrunk = hunger === 0
+  const [bounce, setBounce] = useState(false)
+
+  function handleClick(e) {
+    setBounce(true)
+    setTimeout(() => setBounce(false), 300)
+    onClick?.(e)
+  }
 
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       style={{
         width: size,
         height: size,
@@ -72,8 +79,9 @@ export default function Spider({ onClick }) {
           ? `shake ${style.animationDuration}s ease-in-out infinite`
           : `float ${style.animationDuration}s ease-in-out infinite`,
         opacity: style.opacity * entryOpacity,
-        transition: 'opacity 0.8s ease',
-        transform: `scale(${entryScale})`,
+        transition: 'opacity 0.8s ease, transform 0.15s ease, filter 0.15s ease',
+        transform: bounce ? `scale(${entryScale * 1.08})` : `scale(${entryScale})`,
+        filter: bounce ? 'brightness(1.2)' : 'none',
       }}
     >
       <svg

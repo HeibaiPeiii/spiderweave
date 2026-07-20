@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSpider } from '../contexts/SpiderContext.jsx'
+import { playComplete } from '../utils/sound.js'
 import WebSvg from '../components/WebSvg.jsx'
 import StepList from '../components/StepList.jsx'
 import CreateWebModal from '../components/CreateWebModal.jsx'
@@ -56,6 +57,7 @@ export default function WebDetailPage({ webId, onNavigate }) {
   function handleConfirmComplete() {
     if (!confirmThread) return
     completeStep(webId, confirmThread)
+    playComplete()
     setConfirmThread(null)
     setAnimatingThreadId(confirmThread)
     setLastDoneThreadId(confirmThread)
